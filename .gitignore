@@ -1,0 +1,24 @@
+# Python virtual environments
+.venv/
+venv/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
+
+# Scrapy output
+*.csv
+*.json
+*.xml
+
+# System files
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# Mac/Linux hidden files
+*.swp
