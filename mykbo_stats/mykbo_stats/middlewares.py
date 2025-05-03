@@ -15,7 +15,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import undetected_chromedriver as uc
+#import undetected_chromedriver as uc
+from selenium.webdriver.chrome.service import Service
 import json
 
 # useful for handling different item types with a single interface
@@ -172,19 +173,24 @@ class MykboStatsDownloaderMiddleware:
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option("useAutomationExtension", False)
 
-        self.driver = webdriver.Chrome(options=options)
+        chrome_path = "/usr/bin/chromedriver"  # Must be correct path to pi chromedriver
+        service = Service(chrome_path)
+        self.driver = webdriver.Chrome(service=service, options=options)
+
+        #self.driver = webdriver.Chrome(options=options)
+        
         #options.add_argument("--start-minimized")
         #self.driver = uc.Chrome(options=options, headless=False)
-        self.driver.execute_cdp_cmd(
-            "Page.addScriptToEvaluateOnNewDocument",
-            {
-                "source": """
-                    Object.defineProperty(navigator, 'webdriver', {
-                        get: () => undefined
-                    });
-                """
-            }
-        )
+        # self.driver.execute_cdp_cmd(
+        #     "Page.addScriptToEvaluateOnNewDocument",
+        #     {
+        #         "source": """
+        #             Object.defineProperty(navigator, 'webdriver', {
+        #                 get: () => undefined
+        #             });
+        #         """
+        #     }
+        # )
         
         
         # Testing use of undetected_chromedriver 
