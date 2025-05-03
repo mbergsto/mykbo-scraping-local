@@ -96,16 +96,16 @@ class MykboStatsDownloaderMiddleware:
         
         self.driver.get(request.url)
         
-        try:
-            with open("cookies.json", "r") as f:
-                cookies = json.load(f)
-            for cookie in cookies:
-                if isinstance(cookie.get("expiry", None), float):
-                    cookie["expiry"] = int(cookie["expiry"])
-                self.driver.add_cookie(cookie)
-            self.driver.refresh()
-        except FileNotFoundError:
-            spider.logger.info("No cookies found")
+        # try:
+        #     with open("cookies.json", "r") as f:
+        #         cookies = json.load(f)
+        #     for cookie in cookies:
+        #         if isinstance(cookie.get("expiry", None), float):
+        #             cookie["expiry"] = int(cookie["expiry"])
+        #         self.driver.add_cookie(cookie)
+        #     self.driver.refresh()
+        # except FileNotFoundError:
+        #     spider.logger.info("No cookies found")
         
         print("Processing new request: ", request.url)
         
@@ -159,8 +159,8 @@ class MykboStatsDownloaderMiddleware:
         
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
     
-        #options = Options()
-        options = uc.ChromeOptions()
+        options = Options()
+        #options = uc.ChromeOptions()
         #options.add_argument("--headless=new")  
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--no-sandbox")
@@ -169,12 +169,12 @@ class MykboStatsDownloaderMiddleware:
         options.add_argument(f"user-agent={user_agent}")
         
         #Removes 'navigator.webdriver'
-        #options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        #options.add_experimental_option("useAutomationExtension", False)
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
 
-        #self.driver = webdriver.Chrome(options=options)
-        options.add_argument("--start-minimized")
-        self.driver = uc.Chrome(options=options, headless=False)
+        self.driver = webdriver.Chrome(options=options)
+        #options.add_argument("--start-minimized")
+        #self.driver = uc.Chrome(options=options, headless=False)
         self.driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {
