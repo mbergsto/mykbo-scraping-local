@@ -23,3 +23,6 @@ __pycache__/
 
 # Mac/Linux hidden files
 *.swp
+
+# env files
+.env
