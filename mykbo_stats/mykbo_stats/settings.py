@@ -62,9 +62,19 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "mykbo_stats.pipelines.MykboStatsPipeline": 300,
-#}
+ITEM_PIPELINES = {
+   "mykbo_stats.pipelines.ScrapeLogPipeline": 300,
+}
+
+# MariaDB Connection String Local
+CONNECTION_STRING_LOCAL = {
+    "driver": "mariadb",
+    "user": "bigdata",
+    "password": "bigdata+",
+    "host": "127.0.0.1",
+    "port": 3307,
+    "database": "scraping_local",
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -93,4 +103,3 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 FEED_EXPORT_INDENT = 2
 FEED_FORMAT = "json"
-FEED_URI = "output.json"

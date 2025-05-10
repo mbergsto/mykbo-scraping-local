@@ -9,14 +9,15 @@ class MykboSpider(scrapy.Spider):
     allowed_domains = ["mykbostats.com"]
     start_urls = ["https://mykbostats.com/schedule"]
 
-    EARLIEST_DATE = datetime(2025, 3, 4)
+    EARLIEST_DATE = datetime(2025, 4, 28)
 
     def parse(self, response):
+        self.logger.info(f"[parse] Parsing schedule page: {response.url}")
         games = response.css('a.game-line')
         stop_pagination = False
         self.logger.info(f"[parse] Found {len(games)} games")
         
-        for game in games:
+        for game in games[:3]:
             date_str = response.css("input#schedule_start::attr(value)").get()
             if date_str:
                 date = datetime.strptime(date_str, "%Y-%m-%d")
