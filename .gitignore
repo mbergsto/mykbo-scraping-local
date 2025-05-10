@@ -13,6 +13,7 @@ __pycache__/
 *.csv
 *.json
 *.xml
+*.jl
 
 # System files
 .DS_Store
