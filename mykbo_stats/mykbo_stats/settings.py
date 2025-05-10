@@ -90,3 +90,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Set settings whose default value is deprecated to a future-proof value
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+FEED_EXPORT_INDENT = 2
+FEED_FORMAT = "json"
+FEED_URI = "output.json"
