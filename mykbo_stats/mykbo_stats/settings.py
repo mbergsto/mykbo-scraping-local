@@ -76,6 +76,9 @@ CONNECTION_STRING_LOCAL = {
     "database": "scraping_local",
 }
 
+# Determine if we should check the scrape date to avoid scraping the same date again
+ENABLE_SCRAPE_DATE_CHECK = True
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

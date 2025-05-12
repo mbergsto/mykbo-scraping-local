@@ -2,6 +2,8 @@ import scrapy
 from scrapy.loader import ItemLoader
 from mykbo_stats.items import GameData, TeamData, BattingStat, PitchingStat
 from datetime import datetime
+from scrapy.utils.project import get_project_settings
+import mariadb
 
 
 class MykboSpider(scrapy.Spider):
@@ -9,7 +11,34 @@ class MykboSpider(scrapy.Spider):
     allowed_domains = ["mykbostats.com"]
     start_urls = ["https://mykbostats.com/schedule"]
 
-    EARLIEST_DATE = datetime(2025, 4, 28)
+    EARLIEST_DATE = datetime(2025, 3, 4)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        settings = get_project_settings()
+        self.check_latest_scrape = settings.get("ENABLE_SCRAPE_DATE_CHECK", True)
+        self.latest_scrape_date = None
+        if self.check_latest_scrape:
+            db_params = settings.get("CONNECTION_STRING_LOCAL")
+            try:
+                self.conn = mariadb.connect(
+                    user=db_params["user"],
+                    password=db_params["password"],
+                    host=db_params["host"],
+                    port=db_params["port"],
+                    database=db_params["database"]
+                )
+                self.cursor = self.conn.cursor()
+                self.cursor.execute("SELECT MAX(run_timestamp) FROM scrape_runs")
+                result = self.cursor.fetchone()
+                if result and result[0]:
+                    self.latest_scrape_date = result[0]
+                    self.conn.close()
+            except mariadb.Error as e:
+                self.logger.error(f"Error connecting to MariaDB: {e}")
+                raise
+        self.logger.info(f"[__init__] Latest scrape date: {self.latest_scrape_date}")
+        
 
     def parse(self, response):
         self.logger.info(f"[parse] Parsing schedule page: {response.url}")
@@ -21,10 +50,8 @@ class MykboSpider(scrapy.Spider):
             date_str = response.css("input#schedule_start::attr(value)").get()
             if date_str:
                 date = datetime.strptime(date_str, "%Y-%m-%d")
-                if date < self.EARLIEST_DATE:
-                    self.logger.info(f"[parse] Stopping pagination as the date {date} is earlier than {self.EARLIEST_DATE}.")
-                    stop_pagination = True
-                    break
+                if self.check_latest_scrape and self.latest_scrape_date and date <= self.latest_scrape_date:
+                    stop_pagination = True 
             status_text = game.css('div.status::text').get()
             has_time_class = game.css("div.time")
             if (status_text and "Canceled" in status_text) or has_time_class:
@@ -36,6 +63,7 @@ class MykboSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_game)
         
         if stop_pagination:
+            self.logger.info(f"[parse] Stopping pagination as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date}.")
             return
 
         # Pagination

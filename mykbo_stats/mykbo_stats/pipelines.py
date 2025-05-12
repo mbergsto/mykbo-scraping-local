@@ -7,6 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 from scrapy.utils.project import get_project_settings
+from scrapy.exceptions import CloseSpider
 import mariadb
 from datetime import datetime
 import logging
