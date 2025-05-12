@@ -11,7 +11,7 @@ class MykboSpider(scrapy.Spider):
     allowed_domains = ["mykbostats.com"]
     start_urls = ["https://mykbostats.com/schedule"]
 
-    EARLIEST_DATE = datetime(2025, 3, 4)
+    EARLIEST_DATE = datetime(2025, 4, 28)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,7 +50,7 @@ class MykboSpider(scrapy.Spider):
             date_str = response.css("input#schedule_start::attr(value)").get()
             if date_str:
                 date = datetime.strptime(date_str, "%Y-%m-%d")
-                if self.check_latest_scrape and self.latest_scrape_date and date <= self.latest_scrape_date:
+                if (self.check_latest_scrape and self.latest_scrape_date and date <= self.latest_scrape_date) or date < self.EARLIEST_DATE:
                     stop_pagination = True 
             status_text = game.css('div.status::text').get()
             has_time_class = game.css("div.time")

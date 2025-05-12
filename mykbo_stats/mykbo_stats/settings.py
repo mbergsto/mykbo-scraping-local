@@ -63,7 +63,8 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "mykbo_stats.pipelines.ScrapeLogPipeline": 300,
+   #"mykbo_stats.pipelines.ScrapeLogPipeline": 300,
+   "mykbo_stats.pipelines.KafkaProducerPipeline": 400,
 }
 
 # MariaDB Connection String Local
@@ -77,7 +78,7 @@ CONNECTION_STRING_LOCAL = {
 }
 
 # Determine if we should check the scrape date to avoid scraping the same date again
-ENABLE_SCRAPE_DATE_CHECK = True
+ENABLE_SCRAPE_DATE_CHECK = False
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

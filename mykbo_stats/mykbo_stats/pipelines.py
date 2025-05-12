@@ -5,12 +5,15 @@
 
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
-from scrapy.utils.project import get_project_settings
-from scrapy.exceptions import CloseSpider
-import mariadb
-from datetime import datetime
 import logging
+import json
+from datetime import datetime
+
+import mariadb
+from confluent_kafka import Producer
+from itemadapter import ItemAdapter
+from scrapy.exceptions import CloseSpider
+from scrapy.utils.project import get_project_settings
 
 
 class ScrapeLogPipeline:
@@ -93,3 +96,36 @@ class ScrapeLogPipeline:
             self.conn.commit()
         self.cursor.close()
         self.conn.close()
+        
+class KafkaProducerPipeline:
+    def __init__(self):
+        # Initialize Kafka producer with server and client configurations
+        self.producer = Producer({
+            'bootstrap.servers': 'localhost:9092',  # Kafka broker address
+            'client.id': 'scrapy-producer'         # Client identifier
+        })
+    
+        
+    def process_item(self, item, spider):
+        # Convert the Scrapy item to a dictionary and serialize it to JSON
+        adapter = ItemAdapter(item)
+        game_id = adapter.get("game_id")  # Extract game ID to use as the Kafka message key
+        
+        try:
+            value = json.dumps(adapter.asdict(), default=default_serializer)    # Serialize item data to JSON
+            self.producer.produce("kbo_game_data", key=game_id, value=value)     # Produce the item to the Kafka topic 'kbo_game_data'
+            self.producer.poll(0)  # Trigger delivery of any pending messages
+        except Exception as e:
+            spider.logger.error(f"Kafka production failed for game {game_id}: {e}")
+        return item     # Return the item for further processing in the pipeline
+        
+    
+    def close_spider(self, spider):
+        # Ensure all messages are sent before closing the producer
+        self.producer.flush()
+        
+
+def default_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Type {type(obj)} not serializable")
