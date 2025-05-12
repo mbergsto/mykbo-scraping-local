@@ -96,16 +96,16 @@ class MykboStatsDownloaderMiddleware:
         
         self.driver.get(request.url)
         
-        try:
-            with open("cookies.json", "r") as f:
-                cookies = json.load(f)
-            for cookie in cookies:
-                if isinstance(cookie.get("expiry", None), float):
-                    cookie["expiry"] = int(cookie["expiry"])
-                self.driver.add_cookie(cookie)
-            self.driver.refresh()
-        except FileNotFoundError:
-            spider.logger.info("No cookies found")
+        # try:
+        #     with open("cookies.json", "r") as f:
+        #         cookies = json.load(f)
+        #     for cookie in cookies:
+        #         if isinstance(cookie.get("expiry", None), float):
+        #             cookie["expiry"] = int(cookie["expiry"])
+        #         self.driver.add_cookie(cookie)
+        #     self.driver.refresh()
+        # except FileNotFoundError:
+        #     spider.logger.info("No cookies found")
         
         print("Processing new request: ", request.url)
         

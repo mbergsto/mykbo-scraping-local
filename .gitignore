@@ -13,6 +13,7 @@ __pycache__/
 *.csv
 *.json
 *.xml
+*.jl
 
 # System files
 .DS_Store
@@ -22,3 +23,6 @@ __pycache__/
 
 # Mac/Linux hidden files
 *.swp
+
+# env files
+.env

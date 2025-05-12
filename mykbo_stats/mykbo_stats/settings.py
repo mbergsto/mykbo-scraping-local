@@ -62,9 +62,22 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "mykbo_stats.pipelines.MykboStatsPipeline": 300,
-#}
+ITEM_PIPELINES = {
+   "mykbo_stats.pipelines.ScrapeLogPipeline": 300,
+}
+
+# MariaDB Connection String Local
+CONNECTION_STRING_LOCAL = {
+    #"driver": "mariadb",
+    "user": "bigdata",
+    "password": "bigdata+",
+    "host": "127.0.0.1",
+    "port": 3307,
+    "database": "scraping_local",
+}
+
+# Determine if we should check the scrape date to avoid scraping the same date again
+ENABLE_SCRAPE_DATE_CHECK = True
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -90,3 +103,6 @@ DOWNLOADER_MIDDLEWARES = {
 # Set settings whose default value is deprecated to a future-proof value
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+FEED_EXPORT_INDENT = 2
+FEED_FORMAT = "json"
