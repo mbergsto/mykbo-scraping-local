@@ -68,7 +68,7 @@ ITEM_PIPELINES = {
 
 # MariaDB Connection String Local
 CONNECTION_STRING_LOCAL = {
-    "driver": "mariadb",
+    #"driver": "mariadb",
     "user": "bigdata",
     "password": "bigdata+",
     "host": "127.0.0.1",

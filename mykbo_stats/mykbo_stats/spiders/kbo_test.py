@@ -17,7 +17,7 @@ class MykboSpider(scrapy.Spider):
         stop_pagination = False
         self.logger.info(f"[parse] Found {len(games)} games")
         
-        for game in games[:3]:
+        for game in games[:2]:
             date_str = response.css("input#schedule_start::attr(value)").get()
             if date_str:
                 date = datetime.strptime(date_str, "%Y-%m-%d")

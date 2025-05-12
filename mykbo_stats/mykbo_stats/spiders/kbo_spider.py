@@ -9,6 +9,7 @@ class MykboSpider(scrapy.Spider):
     allowed_domains = ["mykbostats.com"]
     start_urls = ["https://mykbostats.com/schedule"]
 
+    # This is the date viewed in the filter on top of the page, so it is the date of the first game of the week
     EARLIEST_DATE = datetime(2025, 3, 4)
 
     def parse(self, response):
