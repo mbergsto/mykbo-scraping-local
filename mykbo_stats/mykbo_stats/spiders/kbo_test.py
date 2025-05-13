@@ -5,6 +5,13 @@ from datetime import datetime
 from scrapy.utils.project import get_project_settings
 import mariadb
 
+settings = get_project_settings()
+
+env = get_project_settings().get("RUN_ENV")
+if env == "local":
+    db_params = settings.get("CONNECTION_STRING_LOCAL") # Local DB connection
+else:
+    db_params = settings.get("CONNECTION_STRING_REMOTE") # Remote DB connection on Pi 2
 
 class MykboSpider(scrapy.Spider):
     name = "kbo_test"
@@ -19,8 +26,6 @@ class MykboSpider(scrapy.Spider):
         self.check_latest_scrape = settings.get("ENABLE_SCRAPE_DATE_CHECK", True)
         self.latest_scrape_date = None
         if self.check_latest_scrape:
-            db_params = settings.get("CONNECTION_STRING_LOCAL") # Local DB connection
-            #db_params = settings.get("CONNECTION_STRING_REMOTE") # Remote DB connection on Pi 2
             try:
                 self.conn = mariadb.connect(
                     user=db_params["user"],

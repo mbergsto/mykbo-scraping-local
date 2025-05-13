@@ -15,12 +15,19 @@ from itemadapter import ItemAdapter
 from scrapy.exceptions import CloseSpider
 from scrapy.utils.project import get_project_settings
 
+settings = get_project_settings()
+
+env = get_project_settings().get("RUN_ENV")
+if env == "local":
+    db_params = settings.get("CONNECTION_STRING_LOCAL") # Local DB connection
+    kafka_bootstrap = settings.get("KAFKA_LOCAL_BOOTSTRAP_SERVER") # Kafka broker address localhost
+else:
+    db_params = settings.get("CONNECTION_STRING_REMOTE") # Remote DB connection on Pi 2
+    kafka_bootstrap = settings.get("KAFKA_BOOTSTRAP_SERVER") # Kafka broker address on Pi 1
 
 class ScrapeLogPipeline:
     def __init__(self):
         logging.info("Initializing ScrapeLogPipeline")
-        db_params = get_project_settings().get("CONNECTION_STRING_LOCAL")  # Local DB connection
-        #db_params = get_project_settings().get("CONNECTION_STRING_REMOTE")  # Remote DB connection on Pi 2
         try:
             self.conn = mariadb.connect(
                 user=db_params["user"],
@@ -102,9 +109,7 @@ class KafkaProducerPipeline:
     def __init__(self):
         # Initialize Kafka producer with server and client configurations
         self.producer = Producer({
-            'bootstrap.servers': 'localhost:9092',  # Kafka broker address localhost
-            #'bootstrap.servers': get_project_settings().get("KAFKA_BOOTSTRAP_SERVER"), # Kafka broker address on Pi 1
-
+            'bootstrap.servers': kafka_bootstrap,  # Kafka broker address
             'client.id': 'scrapy-producer'         # Client identifier
         })
     

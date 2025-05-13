@@ -67,6 +67,8 @@ ITEM_PIPELINES = {
    "mykbo_stats.pipelines.KafkaProducerPipeline": 400,
 }
 
+RUN_ENV = "local"  # or "remote"
+
 CONNECTION_STRING_REMOTE = {
     "user": "bigdata",
     "password": "bigdata+",
@@ -74,9 +76,6 @@ CONNECTION_STRING_REMOTE = {
     "port": 3306,
     "database": "scraping_db"
 }
-
-KAFKA_BOOTSTRAP_SERVER = "172.21.229.182"  # IP to Kafka Broker on Pi 1
-
 
 # MariaDB Connection String Local
 CONNECTION_STRING_LOCAL = {
@@ -87,6 +86,10 @@ CONNECTION_STRING_LOCAL = {
     "port": 3307,
     "database": "scraping_local",
 }
+
+KAFKA_LOCAL_BOOTSTRAP_SERVER = "localhost:9092"  # IP to Kafka Broker localhost
+
+KAFKA_BOOTSTRAP_SERVER = "172.21.229.182"  # IP to Kafka Broker on Pi 1
 
 # Determine if we should check the scrape date to avoid scraping the same date again
 ENABLE_SCRAPE_DATE_CHECK = False
