@@ -1,10 +1,12 @@
 import json
 from confluent_kafka import Consumer, KafkaException
 import os
+from scrapy.utils.project import get_project_settings
 
 # Kafka Consumer Configuration
 consumer_conf = {
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': 'localhost:9092',  # Kafka broker address localhost
+    #'bootstrap.servers': get_project_settings().get("KAFKA_BOOTSTRAP_SERVER"), # Kafka broker address on Pi 1
     'group.id': 'kbo-consumer-group',
     'auto.offset.reset': 'earliest'
 }
@@ -12,7 +14,7 @@ consumer_conf = {
 consumer = Consumer(consumer_conf)
 consumer.subscribe(['kbo_game_data'])
 
-output_file = '../results/consumed_data.jl'
+output_file = '../results/consumed_connection_test.jl'
 
 try:
     # Ensure the output directory exists

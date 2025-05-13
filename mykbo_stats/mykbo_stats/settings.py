@@ -63,9 +63,20 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   #"mykbo_stats.pipelines.ScrapeLogPipeline": 300,
+   "mykbo_stats.pipelines.ScrapeLogPipeline": 300,
    "mykbo_stats.pipelines.KafkaProducerPipeline": 400,
 }
+
+CONNECTION_STRING_REMOTE = {
+    "user": "bigdata",
+    "password": "bigdata+",
+    "host": "192.168.1.102",  # IP to mariadb on Pi 2
+    "port": 3306,
+    "database": "scraping_db"
+}
+
+KAFKA_BOOTSTRAP_SERVER = "172.21.229.182"  # IP to Kafka Broker on Pi 1
+
 
 # MariaDB Connection String Local
 CONNECTION_STRING_LOCAL = {
