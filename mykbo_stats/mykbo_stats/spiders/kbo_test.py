@@ -69,7 +69,7 @@ class MykboSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_game)
         
         if stop_pagination:
-            self.logger.info(f"[parse] Stopping pagination as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date}.")
+            self.logger.info(f"[parse] Stopping pagination as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date} or earliest scrape date defined {self.EARLIEST_DATE}.")
             return
 
         # Pagination
