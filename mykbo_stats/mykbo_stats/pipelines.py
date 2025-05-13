@@ -8,6 +8,7 @@
 import logging
 import json
 from datetime import datetime
+import pytz
 
 import mariadb
 from confluent_kafka import Producer
@@ -67,9 +68,10 @@ class ScrapeLogPipeline:
         self.scraped_dates = set()
         
     def open_spider(self, spider):
+        korea_time = datetime.now(pytz.timezone("Asia/Seoul"))
         self.cursor.execute("""
-            INSERT INTO scrape_runs (latest_game_date) VALUES (NULL)
-        """)
+            INSERT INTO scrape_runs (run_timestamp, latest_game_date) VALUES (?, NULL)
+        """, (korea_time,))
         self.conn.commit()
         self.current_run_id = self.cursor.lastrowid
         
