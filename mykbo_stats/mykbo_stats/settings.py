@@ -7,6 +7,9 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import os
+from datetime import datetime
+
 BOT_NAME = "mykbo_stats"
 
 SPIDER_MODULES = ["mykbo_stats.spiders"]
@@ -18,6 +21,15 @@ NEWSPIDER_MODULE = "mykbo_stats.spiders"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+
+log_dir = 'logs'
+os.makedirs(log_dir, exist_ok=True)
+
+LOG_ENABLED = True
+LOG_LEVEL = 'INFO'  # or 'DEBUG' for more detailed logs
+LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+LOG_FILE = os.path.join(log_dir, f'scrapy_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log')
+
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -64,6 +76,17 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    "mykbo_stats.pipelines.ScrapeLogPipeline": 300,
+   "mykbo_stats.pipelines.KafkaProducerPipeline": 400,
+}
+
+RUN_ENV = "local"  # or "remote"
+
+CONNECTION_STRING_REMOTE = {
+    "user": "bigdata",
+    "password": "bigdata+",
+    "host": "192.168.1.102",  # IP to mariadb on Pi 2
+    "port": 3306,
+    "database": "scraping_db"
 }
 
 # MariaDB Connection String Local
@@ -76,8 +99,12 @@ CONNECTION_STRING_LOCAL = {
     "database": "scraping_local",
 }
 
+KAFKA_LOCAL_BOOTSTRAP_SERVER = "localhost:9092"  # IP to Kafka Broker localhost
+
+KAFKA_BOOTSTRAP_SERVER = "172.21.229.182"  # IP to Kafka Broker on Pi 1
+
 # Determine if we should check the scrape date to avoid scraping the same date again
-ENABLE_SCRAPE_DATE_CHECK = True
+ENABLE_SCRAPE_DATE_CHECK = False
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

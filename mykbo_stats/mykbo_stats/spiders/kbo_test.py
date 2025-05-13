@@ -5,13 +5,20 @@ from datetime import datetime
 from scrapy.utils.project import get_project_settings
 import mariadb
 
+settings = get_project_settings()
+
+env = get_project_settings().get("RUN_ENV")
+if env == "local":
+    db_params = settings.get("CONNECTION_STRING_LOCAL") # Local DB connection
+else:
+    db_params = settings.get("CONNECTION_STRING_REMOTE") # Remote DB connection on Pi 2
 
 class MykboSpider(scrapy.Spider):
     name = "kbo_test"
     allowed_domains = ["mykbostats.com"]
     start_urls = ["https://mykbostats.com/schedule"]
 
-    EARLIEST_DATE = datetime(2025, 3, 4)
+    EARLIEST_DATE = datetime(2025, 4, 28)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -19,7 +26,6 @@ class MykboSpider(scrapy.Spider):
         self.check_latest_scrape = settings.get("ENABLE_SCRAPE_DATE_CHECK", True)
         self.latest_scrape_date = None
         if self.check_latest_scrape:
-            db_params = settings.get("CONNECTION_STRING_LOCAL")
             try:
                 self.conn = mariadb.connect(
                     user=db_params["user"],
@@ -50,7 +56,7 @@ class MykboSpider(scrapy.Spider):
             date_str = response.css("input#schedule_start::attr(value)").get()
             if date_str:
                 date = datetime.strptime(date_str, "%Y-%m-%d")
-                if self.check_latest_scrape and self.latest_scrape_date and date <= self.latest_scrape_date:
+                if (self.check_latest_scrape and self.latest_scrape_date and date <= self.latest_scrape_date) or date < self.EARLIEST_DATE:
                     stop_pagination = True 
             status_text = game.css('div.status::text').get()
             has_time_class = game.css("div.time")
@@ -63,7 +69,7 @@ class MykboSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_game)
         
         if stop_pagination:
-            self.logger.info(f"[parse] Stopping pagination as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date}.")
+            self.logger.info(f"[parse] Stopping pagination as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date} or earliest scrape date defined {self.EARLIEST_DATE}.")
             return
 
         # Pagination
