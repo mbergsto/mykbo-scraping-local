@@ -27,3 +27,6 @@ __pycache__/
 # env files
 .env
 .venv/
+
+# sql files
+*.sql

@@ -13,7 +13,7 @@ import pytz
 import mariadb
 from confluent_kafka import Producer
 from itemadapter import ItemAdapter
-from scrapy.exceptions import CloseSpider
+from scrapy.exceptions import CloseSpider, DropItem
 from scrapy.utils.project import get_project_settings
 
 settings = get_project_settings()
@@ -93,7 +93,7 @@ class ScrapeLogPipeline:
             """, (game_id,))
         if self.cursor.fetchone():
             spider.logger.info(f"Game {game_id} already exists in the database. Skipping.")
-            return item
+            raise DropItem(f"Duplicate game {game_id} – not sending to Kafka.")
         
         # Insert new game metadata into the database
         self.cursor.execute("""
