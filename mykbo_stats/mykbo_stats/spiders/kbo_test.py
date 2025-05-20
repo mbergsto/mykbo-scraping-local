@@ -18,7 +18,7 @@ class MykboSpider(scrapy.Spider):
     allowed_domains = ["mykbostats.com"]
     start_urls = ["https://mykbostats.com/schedule"]
 
-    EARLIEST_DATE = datetime(2025, 5, 13)
+    EARLIEST_DATE = datetime(2025, 5, 1)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
