@@ -2,6 +2,7 @@ from confluent_kafka import Consumer, KafkaException
 import subprocess
 import logging
 import os
+from pathlib import Path
 from scrapy.utils.project import get_project_settings
 
 settings = get_project_settings()  # Load Scrapy project settings
@@ -20,11 +21,6 @@ conf = {
 
 consumer = Consumer(conf)  # Create Kafka consumer
 consumer.subscribe(['trigger_scrape'])  # Subscribe to topic
-
-import os
-import subprocess
-import logging
-from pathlib import Path
 
 def run_scrapy_spider(spider_name, project_dir):
     # Run a Scrapy spider as a subprocess
