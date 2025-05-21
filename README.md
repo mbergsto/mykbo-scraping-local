@@ -31,6 +31,11 @@ A Scrapy-based project for scraping KBO (Korean Baseball Organization) game data
 - Controlled via the `RUN_ENV` variable in `.env` (`local` or `remote`).
 - Manages database connections, Kafka brokers, and logging configuration.
 
+### Kafka Consumer Integration
+
+- A Kafka consumer can trigger the scraper by sending a message to the `trigger_scrape` topic.
+- The project includes a consumer script that listens and `runs scrapy crawl spider_name` when triggered.
+
 ### Results
 
 - Scraped output is saved in the `mykbo_stats/results/` directory in `.jl` or `.json` format.
@@ -52,9 +57,9 @@ A Scrapy-based project for scraping KBO (Korean Baseball Organization) game data
 
 2. **Install Dependencies**
 
-    ```bash
-      pip install -r requirements.txt
-    ```
+   ```bash
+     pip install -r requirements.txt
+   ```
 
 3. **Set up `.env` file**
 
@@ -62,21 +67,21 @@ A Scrapy-based project for scraping KBO (Korean Baseball Organization) game data
 
 - For local MariaDB connection
 
-    ```env
-      MARIADB_USER=bigdata
-      MARIADB_PASSWORD=bigdata+
-      MARIADB_DATABASE=scraping_local
-      MARIADB_ROOT_PASSWORD=bigdata+
-    ```
+  ```env
+    MARIADB_USER=bigdata
+    MARIADB_PASSWORD=bigdata+
+    MARIADB_DATABASE=scraping_local
+    MARIADB_ROOT_PASSWORD=bigdata+
+  ```
 
 4. **Ensure required Docker containers are running**
 
 - Either:
 
-    ```bash
-    docker-compose -f docker-compose.kafka.yml up -d
-    docker-compose -f docker-compose.mariadb.yml up -d
-    ```
+  ```bash
+  docker-compose -f docker-compose.kafka.yml up -d
+  docker-compose -f docker-compose.mariadb.yml up -d
+  ```
 
 - Or verify remote services are reachable.
 
@@ -84,14 +89,14 @@ A Scrapy-based project for scraping KBO (Korean Baseball Organization) game data
 
 - This scrapes full KBO game data and stores output under results/:
 
-    ```bash
-    scrapy crawl kbo_spider -O results/data.jl
-    ```
+  ```bash
+  scrapy crawl kbo_spider -O results/data.jl
+  ```
 
 6. **Optional: Run test spider**
 
 - For testing connections, selectors and logic:
 
-    ```bash
-    scrapy crawl kbo_test
-    ```
+  ```bash
+  scrapy crawl kbo_test
+  ```
