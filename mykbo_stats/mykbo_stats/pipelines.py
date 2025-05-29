@@ -15,6 +15,8 @@ from confluent_kafka import Producer
 from itemadapter import ItemAdapter
 from scrapy.exceptions import CloseSpider, DropItem
 from scrapy.utils.project import get_project_settings
+from scrapy.utils.log import logger
+
 
 settings = get_project_settings()
 
@@ -138,8 +140,17 @@ class KafkaProducerPipeline:
         return item     # Return the item for further processing in the pipeline
         
     
-    def close_spider(self, spider):
-        # Ensure all messages are sent before closing the producer
+    def close_spider(self, spider):        
+        # Send final control message to indicate the end of the scrape
+        control_message = json.dumps({
+            "type": "scrape_end",
+            "timestamp": datetime.now(pytz.timezone("Asia/Seoul")).isoformat()
+        })
+        self.producer.produce("kbo_game_data", key="control", value= control_message)
+        self.producer.poll(0)
+        logger.info("Sent control message to Kafka indicating end of scrape.")
+        
+        # Flush the producer to ensure all messages are sent before closing
         self.producer.flush()
         
 
