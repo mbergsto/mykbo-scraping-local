@@ -84,7 +84,7 @@ RUN_ENV = "remote"  # "local" or "remote"
 CONNECTION_STRING_REMOTE = {
     "user": "bigdata",
     "password": "bigdata+",
-    "host": "192.168.1.102",  # IP to mariadb on Pi 2
+    "host": "192.168.1.132",  # IP to mariadb on Pi 2
     "port": 3306,
     "database": "scraping_db"
 }
