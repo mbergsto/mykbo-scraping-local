@@ -100,3 +100,14 @@ A Scrapy-based project for scraping KBO (Korean Baseball Organization) game data
   ```bash
   scrapy crawl kbo_test
   ```
+
+## Kafka Consumer
+
+To trigger the scraper via Kafka, run the consumer script:
+
+```bash
+python3 mykbo_stats/consumer_trigger_scraper.py
+```
+
+This will listen for messages on the `trigger_scrape` topic and execute the specified spider when a message is received.
+The messages are sent from a Kafka producer connected to the web application.
