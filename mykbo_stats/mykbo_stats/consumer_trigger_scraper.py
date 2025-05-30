@@ -50,11 +50,9 @@ try:
 
         logging.info("Trigger message received. Running scraper...")
         try:
-            cwd = "/Users/martinbergsto/Documents/NTNU/Semester8/Big-Data-System/Project-repositories/mykbo-scraping-local/mykbo_stats"
-            run_scrapy_spider("kbo_test", project_dir=cwd)  # Run the spider
-
-            # Alternative: run Scrapy directly
-            # subprocess.run(['scrapy', 'crawl', 'kbo_test'], check=True, cwd=cwd, env=env)
+            project_root = Path(__file__).resolve().parents[1]  # Go to mykbo_stats directory to find Scrapy project
+            run_scrapy_spider("kbo_test", project_dir=project_root)
+            
         except Exception as e:
             logging.error(f"Error running Scrapy spider: {e}")
 
