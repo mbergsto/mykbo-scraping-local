@@ -141,15 +141,27 @@ class KafkaProducerPipeline:
         
     
     def close_spider(self, spider):        
-        # Send final control message to indicate the end of the scrape
-        control_message = json.dumps({
-            "type": "scrape_end",
-            "timestamp": datetime.now(pytz.timezone("Asia/Seoul")).isoformat()
-        })
-        self.producer.produce("kbo_game_data", key="control", value= control_message)
-        self.producer.poll(0)
-        logger.info("Sent control message to Kafka indicating end of scrape.")
-        
+        item_count = spider.crawler.stats.get_value('item_scraped_count', 0)
+        if item_count and item_count > 0:
+        # Send final control message to indicate the end of the scrape, if there are items scraped
+        # This is to avoid sending a control message if no items were scraped
+            control_message = json.dumps({
+                "type": "scrape_end",
+                "timestamp": datetime.now(pytz.timezone("Asia/Seoul")).isoformat()
+            })
+            self.producer.produce("kbo_game_data", key="control", value= control_message)
+            self.producer.poll(0)
+            logger.info("Sent control message to Hadoop Consumer indicating end of scrape.")  # For logging
+            print("Sent control message to Hadoop Consumer indicating end of scrape.")        # For console output
+        else: 
+            control_message = json.dumps({
+                "type": "no_items_scraped",
+                "timestamp": datetime.now(pytz.timezone("Asia/Seoul")).isoformat()
+            })
+            self.producer.produce("frontend_control", key="control", value=control_message)
+            self.producer.poll(0)
+            logger.warning("Spider closed without scraping any items. Sent control message to Webapp.") 
+            print("Spider closed without scraping any items. Sent control message to Webapp.")
         # Flush the producer to ensure all messages are sent before closing
         self.producer.flush()
         
