@@ -75,7 +75,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   #"mykbo_stats.pipelines.ScrapeLogPipeline": 300,
+   "mykbo_stats.pipelines.ScrapeLogPipeline": 300,
    "mykbo_stats.pipelines.KafkaProducerPipeline": 400,
 }
 

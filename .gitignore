@@ -25,7 +25,7 @@ __pycache__/
 *.swp
 
 # env files
-.env
+# .env
 .venv/
 
 # sql files
