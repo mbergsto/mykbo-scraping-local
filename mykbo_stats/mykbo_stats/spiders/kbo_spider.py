@@ -18,7 +18,7 @@ class MykboSpider(scrapy.Spider):
     allowed_domains = ["mykbostats.com"]
     start_urls = ["https://mykbostats.com/schedule"]
 
-    EARLIEST_DATE = datetime(2025, 3, 4)  # Earliest date of the 2025 season
+    EARLIEST_DATE = datetime(2025, 3, 8)  # Earliest date of the 2025 season
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,7 +56,7 @@ class MykboSpider(scrapy.Spider):
             date_str = response.css("input#schedule_start::attr(value)").get()
             if date_str:
                 date = datetime.strptime(date_str, "%Y-%m-%d")
-                if (self.check_latest_scrape and self.latest_scrape_date and date <= self.latest_scrape_date) or date < self.EARLIEST_DATE:
+                if (self.check_latest_scrape and self.latest_scrape_date and date <= self.latest_scrape_date) or date <= self.EARLIEST_DATE:
                     stop_pagination = True 
             status_text = game.css('div.status::text').get()
             has_time_class = game.css("div.time")
@@ -69,7 +69,8 @@ class MykboSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback=self.parse_game)
         
         if stop_pagination:
-            self.logger.info(f"[parse] Stopping pagination as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date}.")
+            self.logger.info(f"[parse] Stopping scraping as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date} or earliest scrape date defined {self.EARLIEST_DATE}..")
+            print(f"[parse] Stopping scraping as the date {date} is earlier than or equal to the latest scrape date {self.latest_scrape_date} or earliest scrape date defined {self.EARLIEST_DATE}.")
             return
 
         # Pagination
