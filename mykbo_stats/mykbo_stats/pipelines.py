@@ -30,7 +30,6 @@ else:
 
 class ScrapeLogPipeline:
     def __init__(self):
-        # Initialize the pipeline and set up database connection
         logging.info("Initializing ScrapeLogPipeline")
         try:
             self.conn = mariadb.connect(
@@ -43,16 +42,14 @@ class ScrapeLogPipeline:
         except mariadb.Error as e:
             logging.error(f"Error connecting to MariaDB: {e}")
             raise
-        logging.info("Connected to MariaDB")
         self.cursor = self.conn.cursor()
-        
-        # Create tables if they do not already exist
+
         try:
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS scrape_runs (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     run_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    latest_game_date DATE          
+                    latest_game_date DATE
                 )
             """)
             self.cursor.execute("""
@@ -67,55 +64,53 @@ class ScrapeLogPipeline:
         except mariadb.Error as e:
             logging.error(f"Error creating tables: {e}")
             raise
-        logging.info("Tables created or already exist")
         self.conn.commit()
-        self.current_run_id = None  # ID of the current scrape run
-        self.scraped_dates = set()  # Set to track scraped game dates
-        
+        self.scraped_dates = set()
+        self.current_run_id = None
+
     def open_spider(self, spider):
-        # Insert a new scrape run entry when the spider starts
-        korea_time = datetime.now(pytz.timezone("Asia/Seoul"))
-        self.cursor.execute("""
-            INSERT INTO scrape_runs (run_timestamp, latest_game_date) VALUES (?, NULL)
-        """, (korea_time,))
-        self.conn.commit()
-        self.current_run_id = self.cursor.lastrowid  # Store the ID of the current scrape run
-        
+        self.scraped_dates.clear()
+        self.current_run_id = None
+
     def process_item(self, item, spider):
-        # Process each scraped item and insert it into the database
         adapter = ItemAdapter(item)
         game_id = adapter.get("game_id")
         game_date = adapter.get("date")
-        
-        self.scraped_dates.add(game_date)  # Track the date of the scraped game
-        
-        # Check if the game already exists in the database
+        self.scraped_dates.add(game_date)
+
         self.cursor.execute("""
             SELECT id FROM game_metadata WHERE game_id = ?
-            """, (game_id,))
+        """, (game_id,))
         if self.cursor.fetchone():
             spider.logger.info(f"Game {game_id} already exists in the database. Skipping.")
+            print(f"Game {game_id} already exists in the database. Skipping.")
             raise DropItem(f"Duplicate game {game_id} – not sending to Kafka.")
-        
-        # Insert new game metadata into the database
+
+        if self.current_run_id is None:
+            korea_time = datetime.now(pytz.timezone("Asia/Seoul"))
+            self.cursor.execute("""
+                INSERT INTO scrape_runs (run_timestamp, latest_game_date)
+                VALUES (?, NULL)
+            """, (korea_time,))
+            self.conn.commit()
+            self.current_run_id = self.cursor.lastrowid
+
         self.cursor.execute("""
-            INSERT INTO game_metadata (game_id, game_date, scrape_run_id) VALUES (?, ?, ?)
-            """, (game_id, game_date, self.current_run_id))
-        
+            INSERT INTO game_metadata (game_id, game_date, scrape_run_id)
+            VALUES (?, ?, ?)
+        """, (game_id, game_date, self.current_run_id))
         self.conn.commit()
-        
         return item
-    
+
     def close_spider(self, spider):
-        # Update the latest game date for the scrape run and close the database connection
-        if self.scraped_dates:
-            latest_date = max(self.scraped_dates)  # Determine the latest game date
+        if self.current_run_id and self.scraped_dates:
+            latest_date = max(self.scraped_dates)
             self.cursor.execute("""
                 UPDATE scrape_runs SET latest_game_date = ? WHERE id = ?
             """, (latest_date, self.current_run_id))
             self.conn.commit()
-        self.cursor.close()  # Close the database cursor
-        self.conn.close()  # Close the database connection
+        self.cursor.close()
+        self.conn.close()
         
 class KafkaProducerPipeline:
     def __init__(self):

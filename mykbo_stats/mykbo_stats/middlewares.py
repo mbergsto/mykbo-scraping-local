@@ -166,7 +166,7 @@ class MykboStatsDownloaderMiddleware:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
-        options.add_argument(f"user-agent={user_agent}")
+        options.add_argument(f"--user-agent={user_agent}")
         
         #Removes 'navigator.webdriver'
         #options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -175,6 +175,7 @@ class MykboStatsDownloaderMiddleware:
         #self.driver = webdriver.Chrome(options=options)
         options.add_argument("--start-minimized")
         self.driver = uc.Chrome(options=options, headless=False)
+        time.sleep(2)  # Allow time for the browser to start
         self.driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {

@@ -104,7 +104,7 @@ KAFKA_LOCAL_BOOTSTRAP_SERVER = "localhost:9092"  # IP to Kafka Broker localhost
 KAFKA_BOOTSTRAP_SERVER = "172.21.229.182"  # IP to Kafka Broker on Pi 1
 
 # Determine if we should check the scrape date to avoid scraping the same date again
-ENABLE_SCRAPE_DATE_CHECK = False
+ENABLE_SCRAPE_DATE_CHECK = True
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
