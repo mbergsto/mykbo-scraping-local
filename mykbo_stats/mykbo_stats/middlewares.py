@@ -94,23 +94,15 @@ class MykboStatsDownloaderMiddleware:
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
         
+        # Check if the request is for a game page
         self.driver.get(request.url)
-        
-        # try:
-        #     with open("cookies.json", "r") as f:
-        #         cookies = json.load(f)
-        #     for cookie in cookies:
-        #         if isinstance(cookie.get("expiry", None), float):
-        #             cookie["expiry"] = int(cookie["expiry"])
-        #         self.driver.add_cookie(cookie)
-        #     self.driver.refresh()
-        # except FileNotFoundError:
-        #     spider.logger.info("No cookies found")
         
         print("Processing new request: ", request.url)
         
+        # Wait for the page to load and check if it contains game data
         if "/games/" in request.url:
             try:
+                # Wait for the game data to load
                 WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "table.away tbody tr"))
                 )
@@ -119,6 +111,7 @@ class MykboStatsDownloaderMiddleware:
                 spider.logger.warning(f"Exception: {e}")
                 return HtmlResponse(request.url, status=403, body=b'', encoding='utf-8', request=request)
         
+        # If the request is for a schedule page, wait for the schedule to load
         time.sleep(6)
         request.meta['driver'] = self.driver
         # Wait for the page to load
@@ -154,53 +147,39 @@ class MykboStatsDownloaderMiddleware:
 
     def spider_opened(self, spider):
           
-        #This method works for scraping single urls
+        # Log spider opening
         spider.logger.info("Spider opened: %s" % spider.name)
         
+        # Set a custom user agent string
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-    
-        #options = Options()
+        
+        # Initialize Chrome options for undetected_chromedriver
         options = uc.ChromeOptions()
-        #options.add_argument("--headless=new")  
+        # options.add_argument("--headless=new")  # Uncomment for headless mode
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
         options.add_argument(f"--user-agent={user_agent}")
-        
-        #Removes 'navigator.webdriver'
-        #options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        #options.add_experimental_option("useAutomationExtension", False)
-
-        #self.driver = webdriver.Chrome(options=options)
         options.add_argument("--start-minimized")
+        
+        # Start undetected Chrome driver with options
         self.driver = uc.Chrome(options=options, headless=False)
         time.sleep(2)  # Allow time for the browser to start
+        
+        # Remove 'navigator.webdriver' property to help avoid detection
         self.driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {
-                "source": """
-                    Object.defineProperty(navigator, 'webdriver', {
-                        get: () => undefined
-                    });
-                """
+            "source": """
+                Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+                });
+            """
             }
         )
         
-        
-        # Testing use of undetected_chromedriver 
-        
-        # options = uc.ChromeOptions()
-        # options.add_argument("--no-sandbox")
-        # options.add_argument("--disable-dev-shm-usage")
-        # options.add_argument("--window-size=1920,1080")
-        
-        # self.driver = uc.Chrome(options=options, headless=True)
-        
-        
     def spider_closed(self, spider):
-        # with open("cookies.json", "w") as f:
-        #     json.dump(self.driver.get_cookies(), f)
             
         self.driver.quit()
         spider.logger.info("Spider closed: %s" % spider.name)
