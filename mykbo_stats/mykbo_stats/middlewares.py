@@ -165,7 +165,7 @@ class MykboStatsDownloaderMiddleware:
         
         # Start undetected Chrome driver with options
         self.driver = uc.Chrome(options=options, headless=False)
-        time.sleep(2)  # Allow time for the browser to start
+        time.sleep(5)  # Allow time for the browser to start
         
         # Remove 'navigator.webdriver' property to help avoid detection
         self.driver.execute_cdp_cmd(
